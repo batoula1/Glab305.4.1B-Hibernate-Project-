@@ -21,6 +21,20 @@
     </connection>
     <connection id="234f695e-1f62-4e01-877f-0caf76ab26c0">
       <console name="Connection" type="STANDARD" schema="" session="Main" />
+      <console name="Connection 1" type="STANDARD" schema="mysql" session="Main"><![CDATA[public class UserController {
+    // Other methods and variables...
+
+    public static void findUserHql(SessionFactory factory, Session session) {
+        String hqlFrom = "FROM User"; // Example of HQL to get all records of user class
+        TypedQuery<User> query = session.createQuery(hqlFrom, User.class);
+        List<User> results = query.getResultList();
+
+        System.out.printf("%s%13s%17s%34s%n", "|User Id", "|Full name", "|Email", "|Password");
+        for (User u : results) {
+            System.out.printf(" %-10d %-20s %-30s %s %n", u.getId(), u.getFullName(), u.getEmail(), u.getPassword());
+        }
+    }
+}]]></console>
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">
@@ -33,9 +47,15 @@
     <connection id="f8eb9125-097d-42a8-81e3-b47018ee407a" />
     <connection id="234f695e-1f62-4e01-877f-0caf76ab26c0" />
   </component>
+  <component name="DBNavigator.Project.ExecutionManager">
+    <retain-sticky-names value="false" />
+  </component>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
     <last-used-operator value="EQUAL" />
     <filters />
+  </component>
+  <component name="DBNavigator.Project.ScriptExecutionManager" clear-outputs="true">
+    <recently-used-interfaces />
   </component>
   <component name="DBNavigator.Project.Settings">
     <connections>
@@ -622,5 +642,9 @@
         </visibility-settings>
       </environment>
     </general-settings>
+  </component>
+  <component name="DBNavigator.Project.StatementExecutionManager">
+    <execution-variables />
+    <execution-variable-types />
   </component>
 </project>

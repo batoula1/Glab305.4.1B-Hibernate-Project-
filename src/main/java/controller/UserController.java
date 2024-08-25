@@ -11,37 +11,28 @@ import java.util.List;
 
 public class UserController {
     public static void main(String[] args) {
-        SessionFactory factory =
-                new Configuration().configure().buildSessionFactory();
+        SessionFactory factory = new Configuration().configure().buildSessionFactory();
         Session session = factory.openSession();
 
-        // addUser(factory,session);
-
-        //findUser(factory, session, 3);
-
+        // Uncomment the method you want to execute
+        // addUser(session);
+        // findUser(session, 3);
         // updateUser(session, 3);
-
-        //deleteUser(session, 4);
-
-//        findUserHql(factory, session);
-
-//        getRecordById(factory,session);
-
-//        getRecords(session);
-
-//        getMaxSalary(session);
-
-//        getmaxSalaryGroupBy();
-
+        // deleteUser(session, 4);
+        // findUserHql(session);
+        // getRecordById(session);
+        // getRecords(session);
+        // getMaxSalary(session);
+        // getMaxSalaryGroupBy(session);
         namedQueryExample(session);
 
-        factory.close();
         session.close();
+        factory.close();
     }
 
-    public static void addUser(SessionFactory factory, Session session) {
-
+    public static void addUser(Session session) {
         Transaction transaction = session.beginTransaction();
+
         User uOne = new User();
         uOne.setEmail("haseeb@gmail.com");
         uOne.setFullName("Moh Haseeb");
@@ -66,10 +57,10 @@ public class UserController {
         uThree.setAge(30);
         uThree.setCity("Chicago");
 
-        /*========= We can pass value/data by using constructor =========*/
+        // We can pass value/data by using constructor
         User uFour = new User("Christ", "christ@gmail.com", "147852", 35, 35000.3, "NJ");
-        User uFive = new User("Sid", "Sid", "s258", 29, 4000.36, "LA");
-        //Integer  userid = null;
+        User uFive = new User("Sid", "Sid@gmail.com", "s258", 29, 4000.36, "LA");
+
         session.persist(uOne);
         session.persist(uTwo);
         session.persist(uThree);
@@ -77,103 +68,98 @@ public class UserController {
         session.persist(uFive);
 
         transaction.commit();
-        System.out.println("successfully saved");
-        factory.close();
-        session.close();
-
+        System.out.println("Users successfully saved");
     }
 
-    public static void findUser(SessionFactory factory, Session session, int userId) {
-//       Todo comment out addUser method and uncomment findUser method
-
+    public static void findUser(Session session, int userId) {
         Transaction tx = session.beginTransaction();
 
         User u = session.get(User.class, userId);
-        System.out.println("FullName: " + u.getFullName());
-        System.out.println("Email: " + u.getEmail());
-        System.out.println("password: " + u.getPassword());
+        if (u != null) {
+            System.out.println("FullName: " + u.getFullName());
+            System.out.println("Email: " + u.getEmail());
+            System.out.println("Password: " + u.getPassword());
+        } else {
+            System.out.println("User not found with ID: " + userId);
+        }
 
-        //Close resources
         tx.commit();
-        factory.close();
-        session.close();
     }
 
     public static void updateUser(Session session, int userId) {
-        // Todo comment out findUser method and uncomment updateUser method
-
         Transaction tx = session.beginTransaction();
-        User u = new User();
-        u.setId(userId);
-        u.setEmail("mhaseeb@perscholas");
-        u.setFullName("M Haseeb");
-        u.setPassword("123456");
-        session.merge(u);
-        session.getTransaction().commit();
-        session.close();
+        User u = session.get(User.class, userId);
+        if (u != null) {
+            u.setEmail("mhaseeb@perscholas");
+            u.setFullName("M Haseeb");
+            u.setPassword("123456");
+            session.merge(u);
+            System.out.println("User successfully updated");
+        } else {
+            System.out.println("User not found with ID: " + userId);
+        }
+        tx.commit();
     }
 
     public static void deleteUser(Session session, int userId) {
-        // Todo comment out updateUser method and uncomment deleteUser method
-
-        SessionFactory factory = new Configuration().configure().buildSessionFactory();
         Transaction tx = session.beginTransaction();
-        User u = new User();
-        u.setId(userId);
-        session.remove(u);
+        User u = session.get(User.class, userId);
+        if (u != null) {
+            session.remove(u);
+            System.out.println("User successfully deleted");
+        } else {
+            System.out.println("User not found with ID: " + userId);
+        }
         tx.commit();
-        session.close();
-        factory.close();
-
-
     }
-    public static void findUserHql(SessionFactory factory,Session session) {
-        String hqlFrom = "FROM User"; // Example of HQL to get all records of user class
-        String hqlSelect = "SELECT u FROM User u";
-        TypedQuery<User> query = session.createQuery(hqlSelect, User.class);
+
+    public static void findUserHql(Session session) {
+        String hql = "FROM User";
+        TypedQuery<User> query = session.createQuery(hql, User.class);
         List<User> results = query.getResultList();
 
-        System.out.printf("%s%13s%17s%34s%n","|User Id","|Full name","|Email","|Password");
-        for (User u:results) {
+        System.out.printf("%s%13s%17s%34s%n", "|User Id", "|Full name", "|Email", "|Password");
+        for (User u : results) {
             System.out.printf(" %-10d %-20s %-30s %s %n", u.getId(), u.getFullName(), u.getEmail(), u.getPassword());
         }
     }
 
-    public static void getRecordById(SessionFactory factory, Session session) {
+    public static void getRecordById(Session session) {
         String hql = "FROM User u WHERE u.id > 2 ORDER BY u.salary DESC";
         TypedQuery<User> query = session.createQuery(hql, User.class);
         List<User> results = query.getResultList();
+
         System.out.printf("%s%13s%17s%34s%21s%n", "|User Id", "|Full name", "|Email", "|Password", "|Salary");
         for (User u : results) {
             System.out.printf(" %-10d %-20s %-30s %-23s %s %n", u.getId(), u.getFullName(), u.getEmail(), u.getPassword(), u.getSalary());
         }
     }
 
-    public static void getRecords (Session session) {
+    public static void getRecords(Session session) {
         TypedQuery<Object[]> query = session.createQuery(
                 "SELECT U.salary, U.fullName FROM User AS U", Object[].class);
         List<Object[]> results = query.getResultList();
-        System.out.printf("%s%13s%n","Salary","City");
+
+        System.out.printf("%s%13s%n", "Salary", "Full Name");
         for (Object[] a : results) {
-            System.out.printf("%-16s%s%n",a[0],a[1]);
+            System.out.printf("%-16s%s%n", a[0], a[1]);
         }
     }
 
     public static void getMaxSalary(Session session) {
         String hql = "SELECT max(U.salary) FROM User U";
-        TypedQuery<Object> query = session.createQuery(hql,Object.class);
+        TypedQuery<Object> query = session.createQuery(hql, Object.class);
         Object result = query.getSingleResult();
-        System.out.printf("%s%s","Maximum Salary:",result);
+        System.out.println("Maximum Salary: " + result);
     }
 
-    public static void getmaxSalaryGroupBy() {
-        SessionFactory factory = new Configuration().configure().buildSessionFactory();
-        Session session = factory.openSession();
+    public static void getMaxSalaryGroupBy(Session session) {
         String hql = "SELECT SUM(U.salary), U.city FROM User U GROUP BY U.city";
-        TypedQuery query = session.createQuery(hql);
-        List<Object[]> result =query.getResultList();
-        for (Object[] o : result) {
-            System.out.println("Total salary " +o[0] +" | city: "+ o[1] );
+        TypedQuery<Object[]> query = session.createQuery(hql, Object[].class);
+        List<Object[]> results = query.getResultList();
+
+        for (Object[] o : results) {
+            System.out.println("Total salary: " + o[0] + " | City: " + o[1]);
         }
     }
 
@@ -181,13 +167,11 @@ public class UserController {
         String hql = "FROM User u WHERE u.id = :id";
         TypedQuery<User> query = session.createQuery(hql, User.class);
         query.setParameter("id", 2);
-        List<User> result = query.getResultList();
+        List<User> results = query.getResultList();
 
         System.out.printf("%s%13s%17s%34s%21s%n", "|User Id", "|Full name", "|Email", "|Password", "|Salary");
-        for (User u : result) {
+        for (User u : results) {
             System.out.printf(" %-10d %-20s %-30s %-23s %s %n", u.getId(), u.getFullName(), u.getEmail(), u.getPassword(), u.getSalary());
         }
     }
-
-
 }
